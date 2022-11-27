@@ -3,6 +3,7 @@ from .models import Post, Group
 
 FIRST_TEN_POSTS = 10
 
+
 def index(request):
     template = 'posts/index.html'
     posts = Post.objects.all()[:FIRST_TEN_POSTS]
