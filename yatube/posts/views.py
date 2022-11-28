@@ -6,7 +6,7 @@ FIRST_TEN_POSTS = 10
 
 def index(request):
     template = 'posts/index.html'
-    posts = Post.objects.all()[:FIRST_TEN_POSTS]
+    posts = Post.objects.select_related('group')[:FIRST_TEN_POSTS]
     context = {
         'posts': posts,
     }
