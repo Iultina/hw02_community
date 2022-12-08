@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %} {{ post.group.title }} {% endblock %}
+{% block title %} {{ post }} {% endblock %}
 {% block content %}
 <div class="row">
   <aside class="col-12 col-md-3">
@@ -10,7 +10,7 @@
       <!-- если у поста есть группа -->   
       <li class="list-group-item">
         {% if post.group %}   
-          Группа: {{ post.group.title }}  
+          Группа: {{ post.group.title|linebreaks }}  
           <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы</a>
         {% endif %}
       </li>
@@ -32,5 +32,12 @@
      {{ post.text }}
     </p>
   </article>
+  {% if user.is_authenticated %}
+          <div class="d-flex justify-content-end">
+      <form action={% url 'posts:post_edit' post_id=post.id %}" target="_blank">
+       <button class="btn btn-primary">Редактировать</button>
+      </form>
+        </div>
+  {% endif %}
 </div>
 {% endblock %}

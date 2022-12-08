@@ -1,6 +1,8 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
-from .models import Post, Group, User
+from django.contrib.auth.decorators import login_required
+from .models import Group, Post, User
+from .forms import PostForm
 
 num_of_posts = 10
 
@@ -46,8 +48,33 @@ def profile(request, username):
 def post_detail(request, post_id):
     template = 'posts/post_detail.html'
     post = get_object_or_404(Post, pk=post_id)
-    #posts = Post.objects.filter(pk=post.pk)
     context = {
         'post': post,
     }
-    return render(request, template, context) 
+    return render(request, template, context)
+
+def post_create(request):
+    template = 'posts/post_create.html'
+    if request.method == 'POST':
+        form = PostForm(request.POST)
+        if form.is_valid():
+            new_post = form.save(commit=False)
+            new_post.author = request.user
+            new_post.save()
+            return redirect('posts:profile', new_post.author)
+        return render(request, template, {'form': form})
+    form = PostForm()
+    return render(request, template, {'form': form})
+
+def post_edit(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if request.method == 'GET':
+        if request.user is not post.author:
+            return redirect('posts:post_detail', post_id=post.id)
+        form = PostForm(instance=post)
+    if request.method == 'POST':
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            form.save()
+        return redirect('posts:post_detail', post_id=post.id)
+    return render(request, 'post_create.html', {'form': form, 'post': post})
