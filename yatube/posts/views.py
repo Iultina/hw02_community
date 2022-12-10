@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Group, Post, User
 from .forms import PostForm
 
+
 num_of_posts = 10
 
 def index(request):
@@ -53,6 +54,7 @@ def post_detail(request, post_id):
     }
     return render(request, template, context)
 
+@login_required
 def post_create(request):
     template = 'posts/post_create.html'
     if request.method == 'POST':
@@ -66,15 +68,26 @@ def post_create(request):
     form = PostForm()
     return render(request, template, {'form': form})
 
+@login_required
 def post_edit(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    template = 'posts/post_create.html'
+    post = get_object_or_404(Post, pk=post_id)
     if request.method == 'GET':
-        if request.user is not post.author:
-            return redirect('posts:post_detail', post_id=post.id)
-        form = PostForm(instance=post)
+        if post.author != request.user:
+            return redirect('posts:post_detail', post_id)
+        form = PostForm()
+        return render(request, template, {'form': form})
     if request.method == 'POST':
-        form = PostForm(request.POST, instance=post)
+        form = PostForm(
+            request.POST or None,
+            instance=post
+        )
         if form.is_valid():
             form.save()
-        return redirect('posts:post_detail', post_id=post.id)
-    return render(request, 'post_create.html', {'form': form, 'post': post})
+            return redirect('posts:post_detail', post_id)
+        context = {
+        'is_edit': True,
+        'form': form,
+        'post': post
+        }
+        return render(request, template, context)

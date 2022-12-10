@@ -32,12 +32,12 @@
      {{ post.text }}
     </p>
   </article>
-  {% if user.is_authenticated %}
-          <div class="d-flex justify-content-end">
-      <form action={% url 'posts:post_edit' post_id=post.id %}" target="_blank">
-       <button class="btn btn-primary">Редактировать</button>
-      </form>
-        </div>
+ {% if post.author == user %}
+    <div class="d-flex justify-content-end">
+       <a class="btn btn-primary" href="{% url 'posts:post_edit' post.pk %}">
+       редактировать запись</a>
+    </div>
   {% endif %}
 </div>
 {% endblock %}
+
